@@ -31,7 +31,7 @@ waifuvault_upload() {
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
         -F "file=@$target" \
-        -f "password=$password"`
+        -F "password=$password"`
   fi
   waifuvault_token=`echo $waifuvault_response | jq -r '.token'`
 }
