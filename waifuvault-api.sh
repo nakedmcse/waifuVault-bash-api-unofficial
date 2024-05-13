@@ -16,20 +16,22 @@ waifuvault_upload() {
       target="$HOME/${target:2}"
   fi
 
-  local params="expires=$expires&hide_filename=$hideFilename&password=$password&one_time_download=$oneTimeDownload"
+  local params="expires=$expires&hide_filename=$hideFilename&one_time_download=$oneTimeDownload"
 
   if [[ $target == https:* || $target == http:* ]]; then
     waifuvault_response=`curl -sS -X 'PUT' \
         "$waifuvault_baseurl?$params" \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
-        -F "url=$target"`
+        -F "url=$target" \
+        -F "password=$password"`
   else
     waifuvault_response=`curl -sS -X 'PUT' \
         "$waifuvault_baseurl?$params" \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
-        -F "file=@$target"`
+        -F "file=@$target" \
+        -f "password=$password"`
   fi
   waifuvault_token=`echo $waifuvault_response | jq -r '.token'`
 }
