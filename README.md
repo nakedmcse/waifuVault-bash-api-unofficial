@@ -30,6 +30,9 @@ This API contains 5 interactions:
 3. [Update File Info](#update-file-info)
 4. [Delete File](#delete-file)
 5. [Get File](#get-file)
+6. [Create Bucket](#create-bucket)
+7. [Delete Bucket](#delete-bucket)
+8. [Get Bucket](#get-bucket)
 
 You need to include the module files in your code for the package:
 
@@ -39,7 +42,7 @@ source /usr/local/bin/waifuvault-api.sh
 
 ### Upload File<a id="upload-file"></a>
 
-To Upload a file, use the `uploadFile` function. This function takes the following options as an object:
+To Upload a file, use the `waifuvault_upload` function. This function takes the following options as an object:
 
 | Option            | Type      | Description                                                     | Required | Extra info                       |
 |-------------------|-----------|-----------------------------------------------------------------|----------|----------------------------------|
@@ -48,6 +51,7 @@ To Upload a file, use the `uploadFile` function. This function takes the followi
 | `password`        | `string`  | If set, then the uploaded file will be encrypted                | false    |                                  |
 | `hideFilename`    | `bool`    | If true, then the uploaded filename won't appear in the URL     | false    | Defaults to `false`              |
 | `oneTimeDownload` | `bool`    | if supplied, the file will be deleted as soon as it is accessed | false    |                                  |
+| `bucketToken`     | `string`  | Bucket token for token to contain file                          | false    |                                  |
 
 Using a URL:
 
@@ -82,7 +86,7 @@ If you have a token from your upload. Then you can get file info. This results i
 * protected
 * retentionPeriod
 
-Use the `fileInfo` function. This function takes the following options as parameters:
+Use the `waifuvault_info` function. This function takes the following options as parameters:
 
 | Option      | Type      | Description                                                        | Required | Extra info        |
 |-------------|-----------|--------------------------------------------------------------------|----------|-------------------|
@@ -114,7 +118,7 @@ echo $waifuvault_response
 If you have a token from your upload, then you can update the information for the file.  You can change the password or remove it,
 you can set custom expiry time or remove it, and finally you can choose whether the filename is hidden.
 
-Use the `fileUpdate` function. This function takes the following options as parameters:
+Use the `waifuvault_update` function. This function takes the following options as parameters:
 
 | Option              | Type      | Description                                             | Required | Extra info                                  |
 |---------------------|-----------|---------------------------------------------------------|----------|---------------------------------------------|
@@ -135,7 +139,7 @@ echo
 
 ### Delete File<a id="delete-file"></a>
 
-To delete a file, you must supply your token to the `deletefile` function.
+To delete a file, you must supply your token to the `waifuvault_delete` function.
 
 This function takes the following options as parameters:
 
@@ -158,7 +162,7 @@ echo $waifuvault_response
 This lib also supports obtaining a file from the API as a Buffer by supplying either the token or the unique identifier
 of the file (epoch/filename).
 
-Use the `getFile` function. This function takes the following options an object:
+Use the `waifuvault_donwload` function. This function takes the following options an object:
 
 | Option        | Type     | Description                                       | Required                  | Extra info                                 |
 |---------------|----------|---------------------------------------------------|---------------------------|--------------------------------------------|
@@ -178,4 +182,62 @@ source /usr/local/bin/waifuvault-api.sh
 
 echo "-- File Download --"
 waifuvault_download $waifuvault_token "~/Downloads/rider2-copy.png" "dangerWaifu"
+```
+
+### Create Bucket<a id="create-bucket"></a>
+
+Buckets are virtual collections that are linked to your IP and a token. When you create a bucket, you will receive a bucket token that you can use in Get Bucket to get all the files in that bucket
+
+> **NOTE:** Only one bucket is allowed per client IP address, if you call it more than once, it will return the same bucket token
+
+To create a bucket, use the `waifuvault_create_bucket` function. This function does not take any arguments.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Create Bucket --"
+waifuvault_create_bucket
+echo $waifuvault_bucket_token
+```
+
+### Delete Bucket<a id="delete-bucket"></a>
+
+Deleting a bucket will delete the bucket and all the files it contains.
+
+> **IMPORTANT:**  All contained files will be **DELETED** along with the Bucket!
+
+To delete a bucket, you must call the `waifuvault_delete_bucket` function with the following options as parameters:
+
+| Option      | Type      | Description                       | Required | Extra info        |
+|-------------|-----------|-----------------------------------|----------|-------------------|
+| `token`     | `string`  | The token of the bucket to delete | true     |                   |
+
+> **NOTE:** `deleteBucket` will only ever either return `true` or throw an exception if the token is invalid
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Delete Bucket --"
+waifuvault_delete_bucket "$waifuvault_bucket_token"
+echo $waifuvault_response
+```
+
+### Get Bucket<a id="get-bucket"></a>
+
+To get the list of files contained in a bucket, you use the `waifuvault_get_bucket` functions and supply the token.
+This function takes the following options as parameters:
+
+| Option      | Type      | Description             | Required | Extra info        |
+|-------------|-----------|-------------------------|----------|-------------------|
+| `token`     | `string`  | The token of the bucket | true     |                   |
+
+This will respond with the bucket and all the files the bucket contains.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Get Bucket --"
+waifuvault_get_bucket "$waifuvault_bucket_token"
+echo $waifuvault_bucket_token
+echo $waifuvault_bucket_files
 ```

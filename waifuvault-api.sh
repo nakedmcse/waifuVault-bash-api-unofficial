@@ -3,6 +3,29 @@
 waifuvault_baseurl="https://waifuvault.moe/rest"
 waifuvault_response=""
 waifuvault_token=""
+waifuvault_bucket_token=""
+waifuvault_bucket_files=""
+
+# Create Bucket
+waifuvault_create_bucket() {
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/bucket/create" -H 'accept: application/json'`
+  waifuvault_bucket_token=`echo $waifuvault_response | jq -r '.token'`
+}
+
+# Delete Bucket
+waifuvault_delete_bucket() {
+  local token=$1
+  waifuvault_response=`curl -sS -X 'DELETE' "$waifuvault_baseurl/bucket/$token" -H 'accept: */*'`
+}
+
+# Get Bucket
+waifuvault_get_bucket() {
+  local token=$1
+  waifuvault_response=`curl -sS -X 'POST' "$waifuvault_baseurl/bucket/get" -H 'accept: application/json' \
+    -H 'Content-Type: application/json' -d "{\"bucket_token\": \"$token\"}"`
+  waifuvault_bucket_token=`echo $waifuvault_response | jq -r '.token'`
+  waifuvault_bucket_files=`echo $waifuvault_response | jq -r '.files'`
+}
 
 # Upload
 waifuvault_upload() {
@@ -11,6 +34,13 @@ waifuvault_upload() {
   local password=$3
   local hideFilename=$4
   local oneTimeDownload=$5
+  local bucket_token=$6
+
+  local waifuvault_targeturl=$waifuvault_baseurl
+
+  if [[ -n "$bucket_token" ]]; then
+      waifuvault_targeturl="$waifuvault_baseurl/$bucket_token"
+  fi
 
   if [[ "$target" == \~* ]]; then
       target="$HOME/${target:2}"
@@ -20,14 +50,14 @@ waifuvault_upload() {
 
   if [[ $target == https:* || $target == http:* ]]; then
     waifuvault_response=`curl -sS -X 'PUT' \
-        "$waifuvault_baseurl?$params" \
+        "$waifuvault_targeturl?$params" \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
         -F "url=$target" \
         -F "password=$password"`
   else
     waifuvault_response=`curl -sS -X 'PUT' \
-        "$waifuvault_baseurl?$params" \
+        "$waifuvault_targeturl?$params" \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
         -F "file=@$target" \
