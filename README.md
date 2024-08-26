@@ -23,7 +23,7 @@ source /usr/local/bin/waifuvault-api.sh
 
 ## Usage
 
-This API contains 5 interactions:
+This API contains 10 interactions:
 
 1. [Upload File](#upload-file)
 2. [Get File Info](#get-file-info)
@@ -33,6 +33,8 @@ This API contains 5 interactions:
 6. [Create Bucket](#create-bucket)
 7. [Delete Bucket](#delete-bucket)
 8. [Get Bucket](#get-bucket)
+9. [Get Restrictions](#get-restrictions)
+10. [Clear Restrictions](#clear-restrictions)
 
 You need to include the module files in your code for the package:
 
@@ -52,6 +54,8 @@ To Upload a file, use the `waifuvault_upload` function. This function takes the 
 | `hideFilename`    | `bool`    | If true, then the uploaded filename won't appear in the URL     | false    | Defaults to `false`              |
 | `oneTimeDownload` | `bool`    | if supplied, the file will be deleted as soon as it is accessed | false    |                                  |
 | `bucketToken`     | `string`  | Bucket token for token to contain file                          | false    |                                  |
+
+> **NOTE:** Server restrictions are checked by the SDK client side *before* upload, and will exit if they are violated
 
 Using a URL:
 
@@ -240,4 +244,34 @@ echo "-- Get Bucket --"
 waifuvault_get_bucket "$waifuvault_bucket_token"
 echo $waifuvault_bucket_token
 echo $waifuvault_bucket_files
+```
+
+### Get Restrictions<a id="get-restrictions"></a>
+
+To get the list of restrictions applied to the server, you use the `waifuvault_get_restrictions` functions.
+
+This will respond with values describing the restrictions applied to the server.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Get Restrictions --"
+waifuvault_get_restrictions
+echo $waifuvault_max_file_size
+echo $waifuvault_banned_file_types
+```
+
+### Clear Restrictions<a id="clear-restrictions"></a>
+
+To clear the downloaded restrictions in the SDK, you use the `waifuvault_clear_restrictions` function.
+
+This will remove the restrictions and a fresh copy will be downloaded at the next upload.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Clear Restrictions --"
+waifuvault_clear_restrictions
+echo $waifuvault_max_file_size
+echo $waifuvault_banned_file_types
 ```

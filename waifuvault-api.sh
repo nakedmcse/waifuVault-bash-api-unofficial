@@ -5,6 +5,36 @@ waifuvault_response=""
 waifuvault_token=""
 waifuvault_bucket_token=""
 waifuvault_bucket_files=""
+waifuvault_max_file_size=""
+waifuvault_banned_file_types=""
+
+# Get Restrictions
+waifuvault_get_restrictions() {
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/resources/restrictions" -H 'accept: application/json'`
+  waifuvault_max_file_size=`echo $waifuvault_response | jq -r '.[] | select(.type == "MAX_FILE_SIZE") | .value'`
+  waifuvault_banned_file_types=`echo $waifuvault_response | jq -r '.[] | select(.type == "BANNED_MIME_TYPE") | .value'`
+}
+
+# Clear Restrictions
+waifuvault_clear_restrictions() {
+  waifuvault_banned_file_types=""
+  waifuvault_max_file_size=""
+}
+
+# Check Restrictions
+waifuvault_check_restrictions() {
+  local target=$1
+  upload_size=`du "$target" | cut -f1`
+  upload_mime=`file --mime-type -b "$target"`
+  if [ "$upload_size" -gt "$waifuvault_max_file_size" ]; then
+      echo "File is larger than the maximum allowed size $waifuvault_max_file_size"
+      exit 1
+  fi
+  if [[ "${waifuvault_banned_file_types}" =~ "${upload_mime}" ]]; then
+      echo "The file has a banned MIME type: $upload_mime"
+      exit 1
+  fi
+}
 
 # Create Bucket
 waifuvault_create_bucket() {
@@ -56,6 +86,8 @@ waifuvault_upload() {
         -F "url=$target" \
         -F "password=$password"`
   else
+    waifuvault_get_restrictions
+    waifuvault_check_restrictions $target
     waifuvault_response=`curl -sS -X 'PUT' \
         "$waifuvault_targeturl?$params" \
         -H 'accept: application/json' \
