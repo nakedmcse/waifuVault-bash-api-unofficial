@@ -8,6 +8,11 @@ waifuvault_bucket_files=""
 waifuvault_max_file_size=""
 waifuvault_banned_file_types=""
 
+# Set Alternate Base URL
+waifuvault_set_alt_baseurl() {
+  waifuvault_baseurl=$1
+}
+
 # Get Restrictions
 waifuvault_get_restrictions() {
   waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/resources/restrictions" -H 'accept: application/json'`

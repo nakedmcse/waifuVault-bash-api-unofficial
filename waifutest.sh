@@ -2,6 +2,10 @@
 # Waifuvault BASH SDK Test program
 source ./waifuvault-api.sh
 
+# Set Alternate Base URL
+echo "-- Set Alt Base URL--"
+waifuvault_set_alt_baseurl "https://waifuvault.walker.moe/rest"
+
 # Upload File
 echo "-- Upload File --"
 waifuvault_upload "~/Downloads/rider2.png" "5m" "dangerWaifu" "false" "false"

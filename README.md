@@ -23,7 +23,7 @@ source /usr/local/bin/waifuvault-api.sh
 
 ## Usage
 
-This API contains 10 interactions:
+This API contains 11 interactions:
 
 1. [Upload File](#upload-file)
 2. [Get File Info](#get-file-info)
@@ -35,6 +35,7 @@ This API contains 10 interactions:
 8. [Get Bucket](#get-bucket)
 9. [Get Restrictions](#get-restrictions)
 10. [Clear Restrictions](#clear-restrictions)
+11. [Set Alternate Base URL](#set-alt-baseurl)
 
 You need to include the module files in your code for the package:
 
@@ -274,4 +275,17 @@ echo "-- Clear Restrictions --"
 waifuvault_clear_restrictions
 echo $waifuvault_max_file_size
 echo $waifuvault_banned_file_types
+```
+
+### Set Alternate Base URL<a id="set-alt-baseurl"></a>
+
+To set a custom base URL in the SDK, you use the `waifuvault_set_alt_baseurl` function.
+
+This will change the base URL used for all functions within the SDK.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Set Alt Base URL--"
+waifuvault_set_alt_baseurl "https://waifuvault.walker.moe/rest"
 ```

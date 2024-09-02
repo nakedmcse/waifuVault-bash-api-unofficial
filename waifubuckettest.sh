@@ -2,6 +2,10 @@
 # Waifuvault BASH SDK Test program
 source ./waifuvault-api.sh
 
+# Set Alternate Base URL
+echo "-- Set Alt Base URL--"
+waifuvault_set_alt_baseurl "https://waifuvault.walker.moe/rest"
+
 # Create a bucket
 echo "-- Create Bucket --"
 waifuvault_create_bucket
