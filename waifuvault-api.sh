@@ -5,8 +5,15 @@ waifuvault_response=""
 waifuvault_token=""
 waifuvault_bucket_token=""
 waifuvault_bucket_files=""
+waifuvault_album_token=""
+waifuvault_album_public_token=""
+waifuvault_album_url=""
+waifuvault_album_name=""
+waifuvault_album_files=""
 waifuvault_max_file_size=""
 waifuvault_banned_file_types=""
+waifuvault_records_count=""
+waifuvault_records_size=""
 
 # Set Alternate Base URL
 waifuvault_set_alt_baseurl() {
@@ -41,6 +48,13 @@ waifuvault_check_restrictions() {
   fi
 }
 
+# Get File Stats
+waifuvault_get_file_stats() {
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/resources/stats/files" -H 'accept: application/json'`
+  waifuvault_records_count=`echo $waifuvault_response | jq -r '.recordCount'`
+  waifuvault_records_size=`echo $waifuvault_response | jq -r '.recordSize'`
+}
+
 # Create Bucket
 waifuvault_create_bucket() {
   waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/bucket/create" -H 'accept: application/json'`
@@ -60,6 +74,69 @@ waifuvault_get_bucket() {
     -H 'Content-Type: application/json' -d "{\"bucket_token\": \"$token\"}"`
   waifuvault_bucket_token=`echo $waifuvault_response | jq -r '.token'`
   waifuvault_bucket_files=`echo $waifuvault_response | jq -r '.files'`
+}
+
+# Create Album
+waifuvault_create_album() {
+  local token=$1
+  local name=$2
+  waifuvault_response=`curl -sS -X 'POST' "$waifuvault_baseurl/album/$token" -H 'accept: application/json' \
+                          -H 'Content-Type: application/json' -d "{\"name\": \"$name\"}"`
+  waifuvault_album_token=`echo $waifuvault_response | jq -r '.token'`
+  waifuvault_album_name=`echo $waifuvault_response | jq -r '.name'`
+}
+
+# Delete Album
+waifuvault_delete_album() {
+  local token=$1
+  local delete=$2
+  waifuvault_response=`curl -sS -X 'DELETE' "$waifuvault_baseurl/album/$token?deleteFiles=$delete" -H 'accept: */*'`
+}
+
+# Get Album
+waifuvault_get_album() {
+  local token=$1
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/album/$token" -H 'accept: application/json'`
+  waifuvault_album_token=`echo $waifuvault_response | jq -r '.token'`
+  waifuvault_album_name=`echo $waifuvault_response | jq -r '.name'`
+  waifuvault_album_public_token=`echo $waifuvault_response | jq -r '.publicToken'`
+  waifuvault_album_files=`echo $waifuvault_response | jq -r '.files'`
+}
+
+# Share Album
+waifuvault_share_album() {
+  local token=$1
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/album/share/$token" -H 'accept: application/json'`
+  waifuvault_album_url=`echo $waifuvault_response | jq -r '.description'`
+}
+
+# Revoke Album
+waifuvault_album_revoke() {
+  local token=$1
+  waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/album/revoke/$token" -H 'accept: application/json'`
+  waifuvault_album_url=""
+}
+
+# Associate File
+waifuvault_album_associate() {
+  local token=$1
+  local files=$2
+  waifuvault_response=`curl -sS -X 'POST' "$waifuvault_baseurl/album/$token/associate" -H 'accept: application/json' \
+                            -H 'Content-Type: application/json' -d "{\"fileTokens\": [$files]}"`
+  waifuvault_album_token=`echo $waifuvault_response | jq -r '.token'`
+  waifuvault_album_name=`echo $waifuvault_response | jq -r '.name'`
+  waifuvault_album_files=`echo $waifuvault_response | jq -r '.files'`
+}
+
+# Disassociate File
+waifuvault_album_disassociate() {
+  local token=$1
+  local files=$2
+  waifuvault_response=`curl -sS -X 'POST' "$waifuvault_baseurl/album/$token/disassociate" -H 'accept: application/json' \
+                            -H 'Content-Type: application/json' -d "{\"fileTokens\": [$files]}"`
+  waifuvault_album_token=`echo $waifuvault_response | jq -r '.token'`
+  waifuvault_album_name=`echo $waifuvault_response | jq -r '.name'`
+  waifuvault_album_files=`echo $waifuvault_response | jq -r '.files'`
 }
 
 # Upload
