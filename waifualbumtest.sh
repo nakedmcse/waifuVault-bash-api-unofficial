@@ -55,9 +55,19 @@ echo $waifuvault_album_url
 echo
 sleep 1
 
+# Download Album
+echo "-- Download Album --"
+waifuvault_get_album $waifuvault_album_token
+waifuvault_album_download $waifuvault_album_public_token "test-album.zip" ""
+echo
+ls test-album.zip
+rm -f test-album.zip
+echo
+sleep 1
+
 # Revoke Album
 echo "-- Revoke Album --"
-waifuvault_revoke_album $waifuvault_album_token
+waifuvault_album_revoke $waifuvault_album_token
 echo $waifuvault_album_url
 echo
 sleep 1

@@ -139,6 +139,15 @@ waifuvault_album_disassociate() {
   waifuvault_album_files=`echo $waifuvault_response | jq -r '.files'`
 }
 
+# Album Download
+waifuvault_album_download() {
+  local token=$1
+  local filename=$2
+  local files=$3
+  curl -X 'POST' --output $filename "$waifuvault_baseurl/album/download/$token" -H 'accept: application/json' \
+                              -H 'Content-Type: application/json' -d "[$files]"
+}
+
 # Upload
 waifuvault_upload() {
   local target=$1
