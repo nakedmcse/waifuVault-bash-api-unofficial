@@ -57,8 +57,7 @@ sleep 1
 
 # Download Album
 echo "-- Download Album --"
-waifuvault_get_album $waifuvault_album_token
-waifuvault_album_download $waifuvault_album_public_token "test-album.zip" ""
+waifuvault_album_download $waifuvault_album_token "test-album.zip" ""
 echo
 ls test-album.zip
 rm -f test-album.zip
