@@ -111,7 +111,7 @@ waifuvault_share_album() {
 }
 
 # Revoke Album
-waifuvault_album_revoke() {
+waifuvault_revoke_album() {
   local token=$1
   waifuvault_response=`curl -sS -X 'GET' "$waifuvault_baseurl/album/revoke/$token" -H 'accept: application/json'`
   waifuvault_album_url=""
@@ -140,7 +140,7 @@ waifuvault_album_disassociate() {
 }
 
 # Album Download
-waifuvault_album_download() {
+waifuvault_download_album() {
   local token=$1
   local filename=$2
   local files=$3

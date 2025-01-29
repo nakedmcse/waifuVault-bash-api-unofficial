@@ -23,7 +23,7 @@ source /usr/local/bin/waifuvault-api.sh
 
 ## Usage
 
-This API contains 11 interactions:
+This API contains 20 interactions:
 
 1. [Upload File](#upload-file)
 2. [Get File Info](#get-file-info)
@@ -33,9 +33,18 @@ This API contains 11 interactions:
 6. [Create Bucket](#create-bucket)
 7. [Delete Bucket](#delete-bucket)
 8. [Get Bucket](#get-bucket)
-9. [Get Restrictions](#get-restrictions)
-10. [Clear Restrictions](#clear-restrictions)
-11. [Set Alternate Base URL](#set-alt-baseurl)
+9. [Create Album](#create-album)
+10. [Delete Album](#delete-album)
+11. [Get Album](#get-album)
+12. [Associate File](#associate-file)
+13. [Disassociate File](#disassociate-file)
+14. [Share Album](#share-album)
+15. [Revoke Album](#revoke-album)
+16. [Download Album](#download-album)
+17. [Get Restrictions](#get-restrictions)
+18. [Clear Restrictions](#clear-restrictions)
+19. [Get File Stas](#get-file-stats)
+20. [Set Alternate Base URL](#set-alt-baseurl)
 
 You need to include the module files in your code for the package:
 
@@ -247,6 +256,167 @@ echo $waifuvault_bucket_token
 echo $waifuvault_bucket_files
 ```
 
+### Create Album<a id="create-album"></a>
+Albums are shareable collections of files that exist within a bucket.
+
+To create an album, you use the `waifuvault_create_album` function and supply a bucket token and name.
+
+The function takes the following parameters:
+
+| Option         | Type      | Description                         | Required | Extra info        |
+|----------------|-----------|-------------------------------------|----------|-------------------|
+| `bucket_token` | `string`  | The token of the bucket             | true     |                   |
+| `name`         | `string`  | The name of the album to be created | true     |                   |
+
+This will respond with an album object containing the name and token of the album.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Create Album --"
+waifuvault_create_album $waifuvault_bucket_token "test-album"
+echo $waifuvault_album_token
+echo $waifuvault_album_name
+```
+
+### Delete Album<a id="delete-album"></a>
+To delete an album, you use the `waifuvault_delete_album` function and supply the album token and a boolean indication of whether
+or not the files contained in the album should be deleted or not.  If you chose false, the files will be returned to the
+bucket.
+
+The function takes the following parameters:
+
+| Option         | Type     | Description                         | Required | Extra info        |
+|----------------|----------|-------------------------------------|----------|-------------------|
+| `album_token`  | `string` | The private token of the album      | true     |                   |
+| `delete_files` | `bool`   | Whether the files should be deleted | true     |                   |
+
+> **NOTE:** If `delete_files` is set to True, the files will be permanently deleted
+
+This will respond with a boolean indicating success.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Delete Album --"
+waifuvault_delete_album $waifuvault_album_token "false"
+echo $waifuvault_response
+```
+
+### Get Album<a id="get-album"></a>
+To get the contents of an album, you use the `waifuvault_get_album` function and supply the album token.  The token can be either the private token
+or the public token.
+
+The function takes the following parameters:
+
+| Option   | Type     | Description            | Required | Extra info                     |
+|----------|----------|------------------------|----------|--------------------------------|
+| `token`  | `string` | The token of the album | true     | Can be private or public token |
+
+This will respond with the album object containing the album information and files contained within the album.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Get Album --"
+waifuvault_get_album $waifuvault_album_token 
+echo $waifuvault_album_token
+echo $waifuvault_album_public_token
+echo $waifuvault_album_name
+echo $waifuvault_album_files
+```
+
+### Associate File<a id="associate-file"></a>
+To add files to an album, you use the `waifuvault_album_associate` function and supply the private album token and
+a list of file tokens.
+
+The function takes the following parameters:
+
+| Option  | Type           | Description                         | Required | Extra info |
+|---------|----------------|-------------------------------------|----------|------------|
+| `token` | `string`       | The private token of the album      | true     |            |
+| `files` | `list[string]` | List of file tokens to add to album | true     |            |
+
+This will respond with the new album object containing the added files.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Associate Album --"
+waifuvault_album_associate $waifuvault_album_token "\"${file1}\",\"${file2}\""
+echo $waifuvault_album_token
+echo $waifuvault_album_name
+echo $waifuvault_album_files
+```
+
+### Disassociate File<a id="disassociate-file"></a>
+To remove files from an album, you use the `waifuvault_album_disassociate` function and supply the private album token and
+a list of file tokens.
+
+The function takes the following parameters:
+
+| Option  | Type           | Description                         | Required | Extra info |
+|---------|----------------|-------------------------------------|----------|------------|
+| `token` | `string`       | The private token of the album      | true     |            |
+| `files` | `list[string]` | List of file tokens to add to album | true     |            |
+
+This will respond with the new album object with the files removed.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Disassociate Album --"
+waifuvault_album_disassociate $waifuvault_album_token "\"${file1}\",\"${file2}\""
+echo $waifuvault_album_token
+echo $waifuvault_album_name
+echo $waifuvault_album_files
+```
+
+### Share Album<a id="share-album"></a>
+To share an album, so it contents can be accessed from a public URL, you use the `waifuvault_share_album` function and
+supply the private token.
+
+The function takes the following parameters:
+
+| Option  | Type           | Description                         | Required | Extra info |
+|---------|----------------|-------------------------------------|----------|------------|
+| `token` | `string`       | The private token of the album      | true     |            |
+
+This will respond with the public URL with which the album can be found.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Share Album --"
+waifuvault_share_album $waifuvault_album_token
+echo $waifuvault_album_url
+```
+
+> **NOTE:** The public album token can now be found in the `get_album` results
+
+### Revoke Album<a id="revoke-album"></a>
+To revoke the sharing of an album, so it will no longer be accessible publicly, you use the `waifuvault_revoke_album` function
+and supply the private token.
+
+The function takes the following parameters:
+
+| Option  | Type           | Description                         | Required | Extra info |
+|---------|----------------|-------------------------------------|----------|------------|
+| `token` | `string`       | The private token of the album      | true     |            |
+
+This will respond with a boolean True if the album was revoked.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Revoke Album --"
+waifuvault_revoke_album $waifuvault_album_token
+echo $waifuvault_album_url
+```
+
+> **NOTE:** Once revoked, the URL for sharing is destroyed.  If the album is later shared again, the URL issued will be different.
+
+
 ### Get Restrictions<a id="get-restrictions"></a>
 
 To get the list of restrictions applied to the server, you use the `waifuvault_get_restrictions` functions.
@@ -275,6 +445,21 @@ echo "-- Clear Restrictions --"
 waifuvault_clear_restrictions
 echo $waifuvault_max_file_size
 echo $waifuvault_banned_file_types
+```
+
+### Get File Stats<a id="get-file-stats"></a>
+
+To get general file stats for the server, you use the `waifuvault_get_file_stats` function.
+
+This takes no parameters and returns the number of files and the size of files on the server.
+
+```bash
+source /usr/local/bin/waifuvault-api.sh
+
+echo "-- Get File Stats --"
+waifuvault_get_file_stats
+echo $waifuvault_records_count
+echo $waifuvault_records_size
 ```
 
 ### Set Alternate Base URL<a id="set-alt-baseurl"></a>
